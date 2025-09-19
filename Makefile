@@ -1,8 +1,9 @@
 AS=i686-elf-as
 CC=i686-elf-gcc
 
-TARGET=kernel
 BUILD_DIR=build
+
+TARGET=$(BUILD_DIR)/kernel
 OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o
 
 all: $(OBJS) $(TARGET) run
