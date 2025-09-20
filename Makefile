@@ -1,20 +1,30 @@
 AS=i686-elf-as
 CC=i686-elf-gcc
 
+INCLUDES=-Isrc/include -Isrc/include/libc
+CFLAGS=-ffreestanding -std=gnu99 -Wall -Wextra -O2 $(INCLUDES)
+LINKFLAGS=-ffreestanding -O2 -nostdlib -lgcc
+
 BUILD_DIR=build
 
 TARGET=$(BUILD_DIR)/kernel
-OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o
+OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/drivers/vgaterm.o \
+		 $(BUILD_DIR)/libc/stdio.o
 
 all: $(OBJS) $(TARGET) run
 
+.PHONY: setup clean
+
+setup:
+	mkdir -p $(BUILD_DIR)/drivers
+	mkdir -p $(BUILD_DIR)/libc
+
 $(TARGET): $(OBJS)
-	$(CC) -m32 -T linker.ld -o $@ $(OBJS) -ffreestanding -O2 -nostdlib -lgcc
+	$(CC) -T linker.ld -o $@ $(OBJS) $(LINKFLAGS)
+$(BUILD_DIR)/%.o: src/%.c
+	$(CC) -c $(CFLAGS) $< -o $@
 
-build/%.o: src/%.c
-	$(CC) -c -m32 -ffreestanding -std=gnu99 -Wall -Wextra -O2 $< -o $@
-
-build/%.o: src/%.s
+$(BUILD_DIR)/%.o: src/%.s
 	$(AS) $< -o $@
 
 run: $(TARGET)
