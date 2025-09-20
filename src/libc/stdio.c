@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <term.h>
 #include <types.h>
 
@@ -59,7 +60,43 @@ void int_to_str(int num, char* str) {
     }
 }
 
+static const char* hexchars = "0123456789ABCDEF";
+int hex_digits_amt(int num) {
+  int i = 0;
+  for (i = 0; num > 0; i++) {
+    i++;
+    num /= 16;
+  }
+  return i;
+}
+
+void byte_to_hex(uint8_t num, char* str) {
+  str[0] = hexchars[(num >> 4) & 0xF];
+  str[1] = hexchars[num & 0xF];
+  str[2] = 0;
+}
+
+void uint32_to_hex(uint32_t num, char* str) {
+  // size_t i;
+  // for (i = 0; num != 0; i++) {
+  //   str[i] = hexchars[num & 0xF];
+  //   num /= 16;
+  // }
+  // str[i] = 0;
+
+  int idx = 0;
+  bool exclude_zeros = true;
+  for (int i = 7; i >= 0; i--) {
+    char nibble = hexchars[(num >> (i*4)) & 0xF];
+    if (nibble != '0') exclude_zeros = false;
+    if (exclude_zeros) continue; 
+    str[idx++] = nibble;
+  }
+  str[idx] = 0;
+}
+
 int printf(const char* format, ...) {
+  screen_color_t color = def_screen_color();
   va_list args;
   va_start(args, format);
 
@@ -74,26 +111,31 @@ int printf(const char* format, ...) {
       } else {
         switch (suffix) {
           case 'c':
-            term_putchar(va_arg(args, int), def_screen_color());
+            term_putchar(va_arg(args, int), color);
             break;
           case 's':
-            term_print(va_arg(args, char*), def_screen_color());
+            term_print(va_arg(args, char*), color);
             break;
           case 'd': {
             int val = va_arg(args, int);
             char buf[int_digits_amt(val)]; // TODO fix size allocation with int_digits_amt           
             int_to_str(val, buf);
-            term_print(buf, def_screen_color());
+            term_print(buf, color);
+          } break;
+          case 'x': {
+            int val = va_arg(args, int);
+            char buf[hex_digits_amt(val)];
+            uint32_to_hex((uint32_t)val, buf);
+            term_print(buf, color);
           } break;
           // case 'f': break;
-          // case 'x': break;
           default:
             printf("%c not supported\n", suffix);
             break;
         }
       }
     } else {
-      term_putchar(current_char, def_screen_color());
+      term_putchar(current_char, color);
     }
   }
 
