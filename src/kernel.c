@@ -21,7 +21,11 @@ void k_main(void) {
   term_print("Hi from a new line and different color!\n", col++);
   term_print("Hi from a new line and different color!\n", col++);
   term_print("Hi from a new line and different color!\n", col++);
-  printf("Hello world %s!\n", "bob");
+  char* test = "h\n";
+  test[0] = char_to_lower('B');
+  term_print(test, def_screen_color());
+
+  printf("Hello world %s! You are %d years old\n", "bob", 123);
 
   while (true) {}
 }
