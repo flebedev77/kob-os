@@ -68,6 +68,15 @@ void term_print(const char* text, vga_color_t color) {
   }
 }
 
+void term_putchar(int c, screen_color_t color) {
+  if (c == '\n') {
+    term_cursor_advanceln(&cursor);
+    return;
+  }
+  vga_mem_ptr[term_cursorpos_to_vga_idx(&cursor)] = c | (color << 8);
+  term_cursor_advance(&cursor);
+}
+
 void term_clear() {
   for (tuint_t y = 0; y < VGA_HEIGHT; y++) {
     for (tuint_t x = 0; x < VGA_WIDTH; x++) {

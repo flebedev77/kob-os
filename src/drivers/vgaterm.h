@@ -60,10 +60,10 @@ tuint_t term_cursorpos_to_vga_idx(struct term_cursor* cursor);
 void term_scroll(struct term_cursor* cursor);
 
 void term_cursor_advance(struct term_cursor* cursor);
-
 void term_cursor_advanceln(struct term_cursor* cursor);
 
 
 void term_print(const char* text, screen_color_t color);
+void term_putchar(int c, screen_color_t color);
 
 void term_clear();
