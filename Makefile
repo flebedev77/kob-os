@@ -9,7 +9,7 @@ BUILD_DIR=build
 
 TARGET=$(BUILD_DIR)/kernel
 OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/drivers/vgaterm.o \
-		 $(BUILD_DIR)/libc/stdio.o
+		 $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o
 
 all: $(OBJS) $(TARGET) run
 
@@ -18,6 +18,7 @@ all: $(OBJS) $(TARGET) run
 setup:
 	mkdir -p $(BUILD_DIR)/drivers
 	mkdir -p $(BUILD_DIR)/libc
+	mkdir -p $(BUILD_DIR)/libk
 
 $(TARGET): $(OBJS)
 	$(CC) -T linker.ld -o $@ $(OBJS) $(LINKFLAGS)

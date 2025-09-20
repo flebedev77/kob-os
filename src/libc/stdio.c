@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -95,11 +96,8 @@ void uint32_to_hex(uint32_t num, char* str) {
   str[idx] = 0;
 }
 
-int printf(const char* format, ...) {
+int vprintf(const char* format, va_list args) {
   screen_color_t color = def_screen_color();
-  va_list args;
-  va_start(args, format);
-
   for (size_t i = 0; format[i] != '\0'; i++) {
     char current_char = format[i]; 
 
@@ -128,6 +126,9 @@ int printf(const char* format, ...) {
             uint32_to_hex((uint32_t)val, buf);
             term_print(buf, color);
           } break;
+          case 'b':
+            term_print((va_arg(args, int)) ? "true" : "false", color);
+          break;
           // case 'f': break;
           default:
             printf("%c not supported\n", suffix);
@@ -138,6 +139,13 @@ int printf(const char* format, ...) {
       term_putchar(current_char, color);
     }
   }
-
   return EXIT_SUCCESS;
+}
+
+int printf(const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  int status = vprintf(format, args);
+  va_end(args);
+  return status;
 }
