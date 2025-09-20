@@ -27,8 +27,9 @@ _start:
   # Setup stack
   mov $stack_top, %esp
 
+  pushl %eax # unsigned int mb_magic
+  pushl %ebx # multiboot_info_t* mbd
   call k_main
   
   hlt
-loop:
-  jmp loop
+  jmp .
