@@ -24,6 +24,28 @@ void print_mb(struct multiboot_info* mbd) {
   printkf("Mmap detected:              %b\n", is_mmap_valid);
   printkf("Contiguous memory detected: %b\n", is_contiguous_mem_valid);
   printkf("---------------------------\n");
+
+  if (is_contiguous_mem_valid) {
+    printkf("Contiguous mem lower %d Kib\n", mbd->mem_lower);
+    printkf("Contiguous mem upper %d Kib\n", mbd->mem_upper);
+    printkf("Contiguous mem size  %d Kib\n", (mbd->mem_upper-mbd->mem_lower));
+    printkf("---------------------------\n");
+  }
+
+  if (is_mmap_valid) {
+    int idx = 0;
+    for(uint32_t i = 0; i < mbd->mmap_length; i += sizeof(multiboot_memory_map_t)) {
+      multiboot_memory_map_t* mmmt = (multiboot_memory_map_t*)(mbd->mmap_addr + i);
+
+      printkf("%d mm\n", idx);
+      printkf(" Start address: 0x%x%x\n", mmmt->addr_high, mmmt->addr_low);
+      printkf(" Length:        0x%x%x\n", mmmt->len_high, mmmt->len_low);
+      printkf(" Size:          0x%x\n", mmmt->size);
+      printkf(" Type:          %d\n", mmmt->type);
+      printkf("---------------------------\n");
+      idx++;
+    }
+  }
 }
 
 void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
@@ -33,21 +55,21 @@ void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
 
   print_mb(mbd);
 
-  term_print("Hello!\n", def_screen_color());
-  term_print("Hello world!\nHi from a new line!\n\n", screen_color(VGA_COLOR_RED, VGA_COLOR_BLUE));
-  vga_color_t col = 0; 
-  term_print("Hi from a new line and different color!\n", col++);
-  term_print("Hi from a new line and different color!\n", col++);
-  term_print("Hi from a new line and different color!\n", col++);
-
-  char* test = "h\n";
-  test[0] = char_to_lower('B');
-  term_print(test, def_screen_color());
-
-  cursor.x = 5;
-  printkf("Hello world %s! Number example %d in hex %x\n", "bob", 123, 123);
-
-  printkf("Multiboot magic number: %x\n", mb_magic);
+  // term_print("Hello!\n", def_screen_color());
+  // term_print("Hello world!\nHi from a new line!\n\n", screen_color(VGA_COLOR_RED, VGA_COLOR_BLUE));
+  // vga_color_t col = 0; 
+  // term_print("Hi from a new line and different color!\n", col++);
+  // term_print("Hi from a new line and different color!\n", col++);
+  // term_print("Hi from a new line and different color!\n", col++);
+  //
+  // char* test = "h\n";
+  // test[0] = char_to_lower('B');
+  // term_print(test, def_screen_color());
+  //
+  // cursor.x = 5;
+  // printkf("Hello world %s! Number example %d in hex %x\n", "bob", 123, 123);
+  //
+  // printkf("Multiboot magic number: %x\n", mb_magic);
 
   while (true) {}
 }
