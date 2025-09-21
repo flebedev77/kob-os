@@ -62,6 +62,9 @@ void term_scroll(struct term_cursor* cursor);
 void term_cursor_advance(struct term_cursor* cursor);
 void term_cursor_advanceln(struct term_cursor* cursor);
 
+void term_cursor_update_position(struct term_cursor* cursor);
+void term_cursor_hide();
+void term_cursor_show(uint8_t cursor_start, uint8_t cursor_end);
 
 void term_print(const char* text, screen_color_t color);
 void term_putchar(int c, screen_color_t color);

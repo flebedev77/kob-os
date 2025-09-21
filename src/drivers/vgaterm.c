@@ -1,4 +1,5 @@
 #include "vgaterm.h"
+#include <libk/io.h>
 
 struct term_cursor cursor = {0};
 
@@ -65,6 +66,7 @@ void term_print(const char* text, vga_color_t color) {
     vga_mem_ptr[term_cursorpos_to_vga_idx(&cursor)] = text[i] | (color << 8);
     term_cursor_advance(&cursor);    
   }
+  term_cursor_update_position(&cursor);
 }
 
 void term_putchar(int c, screen_color_t color) {
@@ -74,6 +76,7 @@ void term_putchar(int c, screen_color_t color) {
   }
   vga_mem_ptr[term_cursorpos_to_vga_idx(&cursor)] = c | (color << 8);
   term_cursor_advance(&cursor);
+  term_cursor_update_position(&cursor);
 }
 
 void term_clear() {
@@ -82,4 +85,26 @@ void term_clear() {
       vga_mem_ptr[x + y * VGA_WIDTH] = 0;
     }
   }
+}
+
+void term_cursor_update_position(struct term_cursor* cursor) {
+  if (cursor == NULL) return;
+
+  tuint_t cursor_pos = term_cursorpos_to_vga_idx(cursor);
+  outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t) (cursor_pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t) ((cursor_pos >> 8) & 0xFF));
+}
+
+void term_cursor_hide() {
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, 0x20);
+}
+void term_cursor_show(uint8_t cursor_start, uint8_t cursor_end) {
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+
+	outb(0x3D4, 0x0B);
+	outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
 }

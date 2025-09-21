@@ -64,6 +64,12 @@ void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
 
   print_mb(mbd);
 
+  cursor.x = 3;
+  cursor.y = 2;
+  term_cursor_update_position(&cursor);
+  term_cursor_hide();
+  term_cursor_show(0, 15);
+
   // term_print("Hello!\n", def_screen_color());
   // term_print("Hello world!\nHi from a new line!\n\n", screen_color(VGA_COLOR_RED, VGA_COLOR_BLUE));
   // vga_color_t col = 0; 
