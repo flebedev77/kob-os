@@ -8,12 +8,13 @@ LINKFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 BUILD_DIR=build
 
 TARGET=$(BUILD_DIR)/kernel
+ISO_TARGET=$(BUILD_DIR)/os.iso
 OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/drivers/vgaterm.o \
 		 $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o
 
 all: $(OBJS) $(TARGET) run
 
-.PHONY: setup clean
+.PHONY: setup clean $(ISO_TARGET)
 
 setup:
 	mkdir -p $(BUILD_DIR)/drivers
@@ -27,6 +28,15 @@ $(BUILD_DIR)/%.o: src/%.c
 
 $(BUILD_DIR)/%.o: src/%.s
 	$(AS) $< -o $@
+
+$(ISO_TARGET): $(TARGET)
+	mkdir -p $(BUILD_DIR)/iso/boot/grub
+	cp $(TARGET) $(BUILD_DIR)/iso/boot/kernel
+	echo "menuentry \"OS\" {" > $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "	multiboot /boot/kernel" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "}" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	grub-mkrescue -o $(ISO_TARGET) $(BUILD_DIR)/iso
+	rm -r $(BUILD_DIR)/iso
 
 run: $(TARGET)
 	qemu-system-i386 -kernel $(TARGET)
