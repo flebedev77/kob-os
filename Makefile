@@ -32,7 +32,9 @@ $(BUILD_DIR)/%.o: src/%.s
 $(ISO_TARGET): $(TARGET)
 	mkdir -p $(BUILD_DIR)/iso/boot/grub
 	cp $(TARGET) $(BUILD_DIR)/iso/boot/kernel
-	echo "menuentry \"OS\" {" > $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "set timeout=0" > $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "set default=0" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "menuentry \"OS\" {" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	echo "	multiboot /boot/kernel" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	echo "}" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	grub-mkrescue -o $(ISO_TARGET) $(BUILD_DIR)/iso
@@ -44,3 +46,5 @@ run: $(TARGET)
 clean:
 	rm $(OBJS)
 	rm $(TARGET)
+	rm $(ISO_TARGET)
+	rm $(BUILD_DIR)/iso -r
