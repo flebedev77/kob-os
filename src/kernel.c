@@ -21,7 +21,7 @@ void print_mb(struct multiboot_info* mbd) {
   bool is_contiguous_mem_valid = mbd->flags & 0b1;
 
   printkf("------- Memory info -------\n");
-  printkf("Mmap detected:              %b\n", is_mmap_valid);
+  printkf("Memory map detected:        %b\n", is_mmap_valid);
   printkf("Contiguous memory detected: %b\n", is_contiguous_mem_valid);
   printkf("---------------------------\n");
 
@@ -37,11 +37,20 @@ void print_mb(struct multiboot_info* mbd) {
     for(uint32_t i = 0; i < mbd->mmap_length; i += sizeof(multiboot_memory_map_t)) {
       multiboot_memory_map_t* mmmt = (multiboot_memory_map_t*)(mbd->mmap_addr + i);
 
-      printkf("%d mm\n", idx);
+      printkf("Memory map %d\n", idx);
       printkf(" Start address: 0x%x%x\n", mmmt->addr_high, mmmt->addr_low);
       printkf(" Length:        0x%x%x\n", mmmt->len_high, mmmt->len_low);
       printkf(" Size:          0x%x\n", mmmt->size);
-      printkf(" Type:          %d\n", mmmt->type);
+      char* type_str;
+      switch(mmmt->type) {
+        case 1: type_str = "Usable RAM"; break;
+        case 2: type_str = "Reserved unusable"; break;
+        case 3: type_str = "ACPI reclaimable RAM"; break;
+        case 4: type_str = "ACPI NVS RAM"; break;
+        case 5: type_str = "Bad memory"; break;
+        default: type_str = "Unknown"; break;
+      }
+      printkf(" Type:          %d (%s)\n", mmmt->type, type_str);
       printkf("---------------------------\n");
       idx++;
     }
