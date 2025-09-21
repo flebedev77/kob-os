@@ -71,13 +71,13 @@ int hex_digits_amt(int num) {
   return i;
 }
 
-void byte_to_hex(uint8_t num, char* str) {
+void byte_to_hex(uint8_t num, char* restrict str) {
   str[0] = hexchars[(num >> 4) & 0xF];
   str[1] = hexchars[num & 0xF];
   str[2] = 0;
 }
 
-void uint32_to_hex(uint32_t num, char* str) {
+void uint32_to_hex(uint32_t num, char* restrict str) {
   // size_t i;
   // for (i = 0; num != 0; i++) {
   //   str[i] = hexchars[num & 0xF];
@@ -96,7 +96,7 @@ void uint32_to_hex(uint32_t num, char* str) {
   str[idx] = 0;
 }
 
-int vprintf(const char* format, va_list args) {
+int vprintf(const char* restrict format, va_list args) {
   screen_color_t color = def_screen_color();
   for (size_t i = 0; format[i] != '\0'; i++) {
     char current_char = format[i]; 
@@ -142,7 +142,7 @@ int vprintf(const char* format, va_list args) {
   return EXIT_SUCCESS;
 }
 
-int printf(const char* format, ...) {
+int printf(const char* restrict format, ...) {
   va_list args;
   va_start(args, format);
   int status = vprintf(format, args);

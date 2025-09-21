@@ -1,3 +1,4 @@
+.arch i386
 .set ALIGN,    1<<0               /* Tell grub to align our kernel in memory */
 .set MEMINFO,  1<<1               /* Ask grub to provide memory map */
 .set FLAGS,    (ALIGN | MEMINFO)  /* Final flags to put into multiboot header */

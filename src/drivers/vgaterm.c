@@ -4,7 +4,6 @@ struct term_cursor cursor = {0};
 
 static uint16_t* vga_mem_ptr = (uint16_t*)VGA_MEMORY;
 
-// TODO: fix these astronomical tuint_t values when they have tiny max values anyways
 tuint_t term_xy_to_vga_idx(tuint_t x, tuint_t y) {
   tuint_t idx = (y * VGA_WIDTH) + x;
   if (idx > VGA_WIDTH * VGA_HEIGHT) {
@@ -18,13 +17,13 @@ tuint_t term_cursorpos_to_vga_idx(struct term_cursor* cursor) {
 }
 
 void term_scroll(struct term_cursor* cursor) {
-  for (tuint_t y = 0; y < VGA_HEIGHT-1; y++) {
+  for (tuint_t y = 1; y < VGA_HEIGHT; y++) {
     for (tuint_t x = 0; x < VGA_WIDTH; x++) {
-      vga_mem_ptr[term_xy_to_vga_idx(x, y)] = vga_mem_ptr[term_xy_to_vga_idx(x, y+1)];
+      vga_mem_ptr[term_xy_to_vga_idx(x, y-1)] = vga_mem_ptr[term_xy_to_vga_idx(x, y)];
     }
   }
   for (tuint_t x = 0; x < VGA_WIDTH; x++) {
-    vga_mem_ptr[term_xy_to_vga_idx(x, VGA_HEIGHT)] = 0;
+    vga_mem_ptr[term_xy_to_vga_idx(x, VGA_HEIGHT-1)] = 0;
   }
 
   if (cursor != NULL)
@@ -40,7 +39,7 @@ void term_cursor_advance(struct term_cursor* cursor) {
     cursor->x = 0;
     cursor->y++;
 
-    if (cursor->y > VGA_HEIGHT) {
+    if (cursor->y >= VGA_HEIGHT-2) {
       term_scroll(cursor);
     }
   }
@@ -51,7 +50,7 @@ void term_cursor_advanceln(struct term_cursor* cursor) {
   cursor->x = 0;
   cursor->y++;
 
-  if (cursor->y > VGA_HEIGHT) {
+  if (cursor->y >= VGA_HEIGHT-2) {
     term_scroll(cursor);
   }
 }
