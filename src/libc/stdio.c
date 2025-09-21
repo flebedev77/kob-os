@@ -116,7 +116,7 @@ int vprintf(const char* restrict format, va_list args) {
             break;
           case 'd': {
             int val = va_arg(args, int);
-            char buf[int_digits_amt(val)]; // TODO fix size allocation with int_digits_amt           
+            char buf[int_digits_amt(val)];
             int_to_str(val, buf);
             term_print(buf, color);
           } break;
