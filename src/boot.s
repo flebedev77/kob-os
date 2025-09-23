@@ -1,4 +1,5 @@
 .arch i386
+.code32
 .set ALIGN,    1<<0               /* Tell grub to align our kernel in memory */
 .set MEMINFO,  1<<1               /* Ask grub to provide memory map */
 .set FLAGS,    (ALIGN | MEMINFO)  /* Final flags to put into multiboot header */
@@ -14,7 +15,7 @@
 
 
 .section .bss
-.align 16 # Follow 16 byte alignment
+.align 16 # Follow 16 byte alignment for C stack (Because gcc expects the stack to be 16 byte aligned and will crash if thats not the case)
 stack_bottom:
 .skip 16384 # 16 KiB stack which grows from top to bottom
 stack_top:
@@ -26,10 +27,12 @@ stack_top:
 
 _start:
   # Setup stack
-  mov $stack_top, %esp
+  movl $stack_top, %esp
 
+  # These are given to us by grub
   pushl %eax # unsigned int mb_magic
   pushl %ebx # multiboot_info_t* mbd
+
   call k_main
   
   hlt
