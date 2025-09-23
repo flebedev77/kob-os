@@ -4,6 +4,7 @@
 #include <term.h>
 #include <stdio.h>
 #include <libk/io.h>
+#include <gdt.h>
 
 #include <multiboot.h>
 
@@ -58,6 +59,8 @@ void print_mb(struct multiboot_info* mbd) {
 }
 
 void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
+  gdt_init();
+
   term_clear();
 
   assertk(mb_magic != MULTIBOOT_BOOTLOADER_MAGIC, "Bootloader magic number is incorrect! Should be %x and is %x. The bootloader is messed up!\n", MULTIBOOT_BOOTLOADER_MAGIC, (int)mb_magic);

@@ -7,10 +7,11 @@ LINKFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 
 BUILD_DIR=build
 
-TARGET=$(BUILD_DIR)/kernel
+TARGET=$(BUILD_DIR)/oskrn
 ISO_TARGET=$(BUILD_DIR)/os.iso
 OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/drivers/vgaterm.o \
-		 $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o
+		 $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o $(BUILD_DIR)/kernel/gdt.o \
+		 $(BUILD_DIR)/kernel/util.o
 
 all: $(OBJS) $(TARGET) run
 
@@ -20,6 +21,7 @@ setup:
 	mkdir -p $(BUILD_DIR)/drivers
 	mkdir -p $(BUILD_DIR)/libc
 	mkdir -p $(BUILD_DIR)/libk
+	mkdir -p $(BUILD_DIR)/kernel
 
 $(TARGET): $(OBJS)
 	$(CC) -T linker.ld -o $@ $(OBJS) $(LINKFLAGS)
@@ -32,11 +34,11 @@ $(BUILD_DIR)/%.o: src/%.s
 $(ISO_TARGET): $(TARGET)
 	mkdir -p $(BUILD_DIR)/iso/boot/grub
 	cp $(TARGET) $(BUILD_DIR)/iso/boot/kernel
-	echo "set timeout=0" > $(BUILD_DIR)/iso/boot/grub/grub.cfg
-	echo "set default=0" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
-	echo "menuentry \"OS\" {" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "set timeout=0"            > $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "set default=0"            >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "menuentry \"OS\" {"       >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	echo "	multiboot /boot/kernel" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
-	echo "}" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	echo "}"                        >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	grub-mkrescue -o $(ISO_TARGET) $(BUILD_DIR)/iso
 	rm -r $(BUILD_DIR)/iso
 
