@@ -4,14 +4,15 @@ CC=i686-elf-gcc
 INCLUDES=-Isrc/include -Isrc/include/libc
 CFLAGS=-ffreestanding -std=gnu99 -Wall -Wextra -O2 $(INCLUDES)
 LINKFLAGS=-ffreestanding -O2 -nostdlib -lgcc
+QEMUFLAGS=-no-reboot
 
 BUILD_DIR=build
 
 TARGET=$(BUILD_DIR)/oskrn
 ISO_TARGET=$(BUILD_DIR)/os.iso
-OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/drivers/vgaterm.o \
+OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel/util.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/drivers/vgaterm.o \
 		 $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o $(BUILD_DIR)/kernel/gdt.o \
-		 $(BUILD_DIR)/kernel/util.o
+		 $(BUILD_DIR)/kernel/idt.o
 
 all: $(OBJS) $(TARGET) run
 
@@ -43,7 +44,7 @@ $(ISO_TARGET): $(TARGET)
 	rm -r $(BUILD_DIR)/iso
 
 run: $(TARGET)
-	qemu-system-i386 -kernel $(TARGET)
+	qemu-system-i386 -kernel $(TARGET) $(QEMUFLAGS)
 
 clean:
 	rm $(OBJS)

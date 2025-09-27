@@ -21,11 +21,13 @@ stack_bottom:
 stack_top:
 
 .section .text 
-.global _start
 
+.global _start
 .extern k_main
 
 _start:
+  cli
+
   # Setup stack
   movl $stack_top, %esp
 
@@ -35,5 +37,7 @@ _start:
 
   call k_main
   
+hang:
+  cli
   hlt
-  jmp .
+  jmp hang

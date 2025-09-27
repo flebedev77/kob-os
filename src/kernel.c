@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <libk/io.h>
 #include <gdt.h>
+#include <idt.h>
 
 #include <multiboot.h>
 
@@ -59,19 +60,21 @@ void print_mb(struct multiboot_info* mbd) {
 }
 
 void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
-  gdt_init();
-
   term_clear();
+
+  print_mb(mbd);
+
+  gdt_init();
+  idt_init();
 
   assertk(mb_magic != MULTIBOOT_BOOTLOADER_MAGIC, "Bootloader magic number is incorrect! Should be %x and is %x. The bootloader is messed up!\n", MULTIBOOT_BOOTLOADER_MAGIC, (int)mb_magic);
 
-  print_mb(mbd);
 
   cursor.x = 3;
   cursor.y = 2;
   term_cursor_update_position(&cursor);
   term_cursor_hide();
-  term_cursor_show(0, 15);
+  // term_cursor_show(0, 15);
 
   // term_print("Hello!\n", def_screen_color());
   // term_print("Hello world!\nHi from a new line!\n\n", screen_color(VGA_COLOR_RED, VGA_COLOR_BLUE));
