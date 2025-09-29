@@ -27,7 +27,7 @@ uint8_t make_access_byte(
   out |= (DC & 1) << 2;
   out |= (E & 1) << 3;
   out |= (S & 1) << 4;
-  out |= (DPL & 0b11) << 6; // DPL is 2 bit
+  out |= (DPL & 0b11) << 5; // DPL is 2 bit
   out |= (P & 1) << 7;
 
   return out;
@@ -39,8 +39,14 @@ int main() {
   // only changed the executable flag
   uint8_t kernel_data = make_access_byte(1, 0, 1, 0, 0, 1, 0);
 
+  uint8_t user_code = make_access_byte(1, 3, 1, 1, 0, 1, 0);
+  uint8_t user_data = make_access_byte(1, 3, 1, 0, 0, 1, 0);
+
   printf("Kernel code descriptor access byte %02X\n", kernel_code);
   printf("Kernel data descriptor access byte %02X\n", kernel_data);
+
+  printf("User code descriptor access byte %02X\n", user_code);
+  printf("User data descriptor access byte %02X\n", user_data);
 
   return 0;
 }
