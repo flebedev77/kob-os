@@ -2,12 +2,15 @@
 .code32
 
 .section .data
-gdtr: .word 0
-      .long 0
+gdtr: .word 0 # uint16_t limit
+      .long 0 # uint32_t base
+
+idtr: .word 0 # uint16_t limit
+      .long 0 # uint32_t base
 
 .section .text
-.global set_gdt
 
+.global set_gdt
 set_gdt:
   movw   4(%esp), %ax
   movw   %ax, gdtr
@@ -24,6 +27,16 @@ flush_segments:
   movw %ax, %ss
   ret
 
+.global set_idt
+set_idt:
+  movw 4(%esp), %ax
+  movw %ax, idtr
+  movl 8(%esp), %eax
+  movl %eax, idtr + 2
+  lidt idtr
+  sti
+  ret
+
 .extern exception_handler
 
 .macro isr_error_stub index
@@ -37,7 +50,6 @@ flush_segments:
     call exception_handler
     iret
 .endm
-
 
 isr_no_error_stub 0
 isr_no_error_stub 1
@@ -139,15 +151,3 @@ isr_stub_table:
         .long isr_stub_45
         .long isr_stub_46
         .long isr_stub_47
-# %macro isr_err_stub 1
-# isr_stub_%+%1:
-#     call exception_handler
-#     iret 
-# %endmacro
-# ; if writing for 64-bit, use iretq instead
-# %macro isr_no_err_stub 1
-# isr_stub_%+%1:
-#     call exception_handler
-#     iret
-# %endmacro
-
