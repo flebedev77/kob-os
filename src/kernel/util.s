@@ -8,15 +8,18 @@ gdtr: .word 0 # uint16_t limit
 idtr: .word 0 # uint16_t limit
       .long 0 # uint32_t base
 
+.global intid
+intid: .byte 0
+
 .section .text
 
 .global set_gdt
 set_gdt:
   movw   4(%esp), %ax
-  movw   %ax, gdtr
+  movw   %ax, (gdtr)
   movl   8(%esp), %eax
-  movl   %eax, gdtr + 2
-  lgdt   gdtr
+  movl   %eax, (gdtr + 2)
+  lgdt   (gdtr)
   ljmp $0x10, $flush_segments
 
   # flushing
@@ -32,8 +35,8 @@ set_idt:
   movw 4(%esp), %ax
   movw %ax, idtr
   movl 8(%esp), %eax
-  movl %eax, idtr + 2
-  lidt idtr
+  movl %eax, (idtr + 2)
+  lidt (idtr)
   sti
   ret
 
@@ -41,12 +44,14 @@ set_idt:
 
 .macro isr_error_stub index
   isr_stub_\index:
+    movb $\index, (intid)
     call exception_handler
     iret
 .endm
 
 .macro isr_no_error_stub index
   isr_stub_\index:
+    movb $\index, (intid)
     call exception_handler
     iret
 .endm
