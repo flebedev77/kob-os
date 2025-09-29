@@ -1,37 +1,39 @@
 #include <idt.h>
+#include <gdt.h>
 #include <libk/io.h>
 #include <stdbool.h>
 
 #define IDT_MAX_DESCRIPTORS 32
 
-__attribute__((aligned(16))) 
-static struct idt_entry idt[256];
-static struct idtr idtr;
+__attribute__((aligned(0x10))) 
+static struct idt_entry idt[256] = {0};
+static struct idtr idtr = {0};
 
 void exception_handler() {
-  panick("Unhandled/unknown exception happened");
-  __asm__ volatile ("cli; hlt");
+  printkf("Exception");
+  // panick("Unhandled/unknown exception happened");
+  // __asm__ volatile ("cli; hlt");
 }
 
-void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
-    struct idt_entry* descriptor = &idt[vector];
+void idt_set_descriptor(uint8_t index, uint32_t isr, uint8_t flags) {
+    struct idt_entry* descriptor = &idt[index];
 
-    descriptor->isr_low        = (uint32_t)isr & 0xFFFF;
-    descriptor->kernel_cs      = 0x10;
+    descriptor->isr_low        = isr & 0xFFFF;
+    descriptor->kernel_cs      = GDT_KERNEL_CODE_SELECTOR;
     descriptor->attributes     = flags;
-    descriptor->isr_high       = ((uint32_t)isr >> 16) & 0xFFFF;
+    descriptor->isr_high       = (isr >> 16) & 0xFFFF;
     descriptor->reserved       = 0;
 }
 
-extern void* isr_stub_table[];
+extern uint32_t isr_stub_table[];
 
 void idt_init() {
-  idtr.base = (uintptr_t)&idt[0];
-  idtr.limit = (uint16_t)sizeof(struct idt_entry) * IDT_MAX_DESCRIPTORS - 1;
-
-  for (uint8_t vector = 0; vector < IDT_MAX_DESCRIPTORS; vector++) {
-    idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
+  for (int index = 0; index < 32; index++) {
+    idt_set_descriptor(index, isr_stub_table[index], 0x8E);
   }
+
+  idtr.base = (uint32_t)&idt;
+  idtr.limit = sizeof(struct idt_entry) * IDT_MAX_DESCRIPTORS - 1;
 
   __asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
   __asm__ volatile ("sti"); // set the interrupt flag

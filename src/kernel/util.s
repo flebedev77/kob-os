@@ -9,13 +9,11 @@ gdtr: .word 0
 .global set_gdt
 
 set_gdt:
-  # cli
   movw   4(%esp), %ax
   movw   %ax, gdtr
   movl   8(%esp), %eax
   movl   %eax, gdtr + 2
   lgdt   gdtr
-  # ret
   ljmp $0x10, $flush_segments
 
   # flushing
@@ -24,7 +22,6 @@ flush_segments:
   movw %ax, %ds
   movw %ax, %es
   movw %ax, %ss
-  # sti
   ret
 
 .extern exception_handler
@@ -41,9 +38,6 @@ flush_segments:
     iret
 .endm
 
-keyboard_handler:
-
-  iret
 
 isr_no_error_stub 0
 isr_no_error_stub 1
@@ -77,6 +71,23 @@ isr_no_error_stub 28
 isr_no_error_stub 29
 isr_error_stub    30
 isr_no_error_stub 31
+
+isr_no_error_stub 32
+isr_no_error_stub 33
+isr_no_error_stub 34
+isr_no_error_stub 35
+isr_no_error_stub 36
+isr_no_error_stub 37
+isr_no_error_stub 38
+isr_no_error_stub 39
+isr_no_error_stub 40
+isr_no_error_stub 41
+isr_no_error_stub 42
+isr_no_error_stub 43
+isr_no_error_stub 44
+isr_no_error_stub 45
+isr_no_error_stub 46
+isr_no_error_stub 47
 
 .global isr_stub_table
 isr_stub_table:
@@ -112,6 +123,22 @@ isr_stub_table:
         .long isr_stub_29
         .long isr_stub_30
         .long isr_stub_31
+        .long isr_stub_32
+        .long isr_stub_33
+        .long isr_stub_34
+        .long isr_stub_35
+        .long isr_stub_36
+        .long isr_stub_37
+        .long isr_stub_38
+        .long isr_stub_39
+        .long isr_stub_40
+        .long isr_stub_41
+        .long isr_stub_42
+        .long isr_stub_43
+        .long isr_stub_44
+        .long isr_stub_45
+        .long isr_stub_46
+        .long isr_stub_47
 # %macro isr_err_stub 1
 # isr_stub_%+%1:
 #     call exception_handler
