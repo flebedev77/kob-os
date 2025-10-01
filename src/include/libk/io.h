@@ -6,5 +6,23 @@ void printkf(const char* restrict format, ...);
 void panick(const char* restrict format, ...);
 void assertk(bool condition, const char* restrict format, ...);
 
-void outb(uint16_t port, uint8_t value);
-uint8_t inb(uint16_t port);
+inline void outb(uint16_t port, uint8_t value) {
+  __asm__ volatile( "outb %0, %1"
+      :
+      : "a"(value), "Nd"(port));
+}
+
+inline uint8_t inb(uint16_t port) {
+  volatile uint8_t value;
+  __asm__ volatile( "inb %1, %0"
+      : "=a"(value)
+      : "Nd"(port));
+  return value;
+}
+
+inline void io_wait(void)
+{
+    outb(0x80, 0);
+}
+
+
