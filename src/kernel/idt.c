@@ -6,6 +6,7 @@
 #include <term.h>
 #include "util.h"
 #include "pic.h"
+#include "../drivers/pckbd.h"
 
 struct idtentry {
   uint32_t isr;
@@ -20,8 +21,7 @@ void interrupt_handler(uint8_t arg) {
     printkf("Fake PIC hardware interrupt occured\n");
   }
   if (intid == SOFTWARE_INTERRUPTS_AMOUNT + 1) { // pckbd interrupt
-    // term_print("Hi", def_screen_color()); 
-    printf("Hello world!\n");
+    pckbd_interrupt(intid);
   } else {
     printkf("Interrupt occured with id %d and arg %d\n", intid, arg);
   }
@@ -46,7 +46,7 @@ void encode_idt_entry(uint8_t* restrict target, struct idtentry source) {
   target[5] = source.attributes;
 }
 
-void idt_init() {
+void idt_init(void) {
   for (int index = 0; index <= IDT_MAX_DESCRIPTORS; index++) { 
     encode_idt_entry(&entries[8 * index], (struct idtentry){ 
         .isr = isr_stub_table[index],

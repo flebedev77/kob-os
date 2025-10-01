@@ -8,6 +8,8 @@
 #include <idt.h>
 #include <pic.h>
 
+#include "drivers/pckbd.h"
+
 #include <multiboot.h>
 
 #if defined(__linux__)
@@ -63,11 +65,13 @@ void print_mb(struct multiboot_info* mbd) {
 void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
   term_clear();
 
-  print_mb(mbd);
+  // print_mb(mbd);
 
   gdt_init();
-  idt_init();
   pic_init();
+  idt_init();
+
+  pckbd_init();
 
   assertk(mb_magic != MULTIBOOT_BOOTLOADER_MAGIC, "Bootloader magic number is incorrect! Should be %x and is %x. The bootloader is messed up!\n", MULTIBOOT_BOOTLOADER_MAGIC, (int)mb_magic);
 

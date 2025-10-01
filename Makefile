@@ -10,9 +10,10 @@ BUILD_DIR=build
 
 TARGET=$(BUILD_DIR)/oskrn
 ISO_TARGET=$(BUILD_DIR)/os.iso
-OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel/util.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/drivers/vgaterm.o \
-		 $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o $(BUILD_DIR)/kernel/gdt.o \
-		 $(BUILD_DIR)/kernel/idt.o $(BUILD_DIR)/kernel/pic.o
+OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel/util.o $(BUILD_DIR)/kernel.o \
+		 $(BUILD_DIR)/drivers/vgaterm.o $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o \
+		 $(BUILD_DIR)/kernel/gdt.o $(BUILD_DIR)/kernel/idt.o $(BUILD_DIR)/kernel/pic.o \
+		 $(BUILD_DIR)/drivers/pckbd.o
 
 all: $(OBJS) $(TARGET) run
 
