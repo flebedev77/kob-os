@@ -30,7 +30,7 @@ void encode_gdt_entry(uint8_t* restrict target, struct gdtentry source)
     target[6] |= (source.flags << 4);
 }
 
-void gdt_init() {
+void gdt_init(void) {
 
   encode_gdt_entry(&entries[8 * 0], (struct gdtentry){0}); //null segment 0x0
   encode_gdt_entry(&entries[8 * 1], (struct gdtentry){0}); //unused segment 0x8
