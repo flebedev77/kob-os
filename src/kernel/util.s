@@ -40,21 +40,29 @@ set_idt:
   sti
   ret
 
-.extern exception_handler
+.extern interrupt_handler
 
 .macro isr_error_stub index
   isr_stub_\index:
     movb $\index, (intid)
-    call exception_handler
-    iret
+    jmp interrupt_handle
 .endm
 
 .macro isr_no_error_stub index
   isr_stub_\index:
     movb $\index, (intid)
-    call exception_handler
-    iret
+    jmp interrupt_handle
 .endm
+
+interrupt_handle:
+  pusha
+
+  call interrupt_handler
+
+  popa
+  add %esp, 4
+
+  iret
 
 isr_no_error_stub 0
 isr_no_error_stub 1
@@ -105,6 +113,9 @@ isr_no_error_stub 44
 isr_no_error_stub 45
 isr_no_error_stub 46
 isr_no_error_stub 47
+isr_no_error_stub 48
+isr_no_error_stub 49
+isr_no_error_stub 50
 
 .global isr_stub_table
 isr_stub_table:
@@ -156,3 +167,6 @@ isr_stub_table:
         .long isr_stub_45
         .long isr_stub_46
         .long isr_stub_47
+        .long isr_stub_48
+        .long isr_stub_49
+        .long isr_stub_50

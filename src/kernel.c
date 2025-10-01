@@ -6,6 +6,7 @@
 #include <libk/io.h>
 #include <gdt.h>
 #include <idt.h>
+#include <pic.h>
 
 #include <multiboot.h>
 
@@ -34,7 +35,7 @@ void print_mb(struct multiboot_info* mbd) {
     printkf("---------------------------\n");
   }
 
-  if (is_mmap_valid) {
+  if (is_mmap_valid && false) {
     int idx = 0;
     for(uint32_t i = 0; i < mbd->mmap_length; i += sizeof(multiboot_memory_map_t)) {
       multiboot_memory_map_t* mmmt = (multiboot_memory_map_t*)(mbd->mmap_addr + i);
@@ -66,6 +67,7 @@ void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
 
   gdt_init();
   idt_init();
+  pic_init();
 
   assertk(mb_magic != MULTIBOOT_BOOTLOADER_MAGIC, "Bootloader magic number is incorrect! Should be %x and is %x. The bootloader is messed up!\n", MULTIBOOT_BOOTLOADER_MAGIC, (int)mb_magic);
 

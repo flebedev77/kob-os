@@ -1,8 +1,11 @@
 #include <idt.h>
 #include <gdt.h>
 #include <libk/io.h>
+#include <stdio.h>
 #include <stdbool.h>
+#include <term.h>
 #include "util.h"
+#include "pic.h"
 
 struct idtentry {
   uint32_t isr;
@@ -12,12 +15,22 @@ struct idtentry {
 __attribute__((aligned(8)))
 static uint8_t entries[8 * 256] = {0};
 
-extern uint8_t intid;
+void interrupt_handler(uint8_t arg) {
+  if (intid == SOFTWARE_INTERRUPTS_AMOUNT + 7 || intid == SOFTWARE_INTERRUPTS_AMOUNT + HARDWARE_INTERRUPTS_AMOUNT) {
+    printkf("Fake PIC hardware interrupt occured\n");
+  }
+  if (intid == SOFTWARE_INTERRUPTS_AMOUNT + 1) { // pckbd interrupt
+    // term_print("Hi", def_screen_color()); 
+    printf("Hello world!\n");
+  } else {
+    printkf("Interrupt occured with id %d and arg %d\n", intid, arg);
+  }
 
-void exception_handler() {
-  // panick("Exception");
-  printkf("Interrupt occured with id %d\n", intid);
-  __asm__ volatile ("cli; hlt");
+  if (intid >= SOFTWARE_INTERRUPTS_AMOUNT && intid <= SOFTWARE_INTERRUPTS_AMOUNT + HARDWARE_INTERRUPTS_AMOUNT) {
+    //is a hardware interrupt
+    pic_send_eoi(intid - SOFTWARE_INTERRUPTS_AMOUNT);
+  }
+  // __asm__ volatile ("cli; hlt");
 }
 
 void encode_idt_entry(uint8_t* restrict target, struct idtentry source) {
@@ -34,7 +47,7 @@ void encode_idt_entry(uint8_t* restrict target, struct idtentry source) {
 }
 
 void idt_init() {
-  for (int index = 0; index < 32; index++) {
+  for (int index = 0; index <= IDT_MAX_DESCRIPTORS; index++) { 
     encode_idt_entry(&entries[8 * index], (struct idtentry){ 
         .isr = isr_stub_table[index],
         .attributes = 0x8E
