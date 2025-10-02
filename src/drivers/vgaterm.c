@@ -6,8 +6,23 @@ struct term_cursor cursor = {0};
 static uint16_t* vga_mem_ptr = (uint16_t*)VGA_MEMORY;
 
 static void term_cursor_boundscheck(struct term_cursor* cursor) {
-  if (cursor->x < 0) cursor->x = 0;
-  if (cursor->x > VGA_WIDTH) cursor->x = 0;
+  if (cursor->x < 0) {
+    cursor->x = 0;
+    if (cursor->y > 0) {
+      cursor->y--;
+      cursor->x = VGA_WIDTH;
+      while (1) {
+        char current_char = vga_mem_ptr[term_cursorpos_to_vga_idx(*cursor)] & 0xFF;
+        if (current_char != ' ' && current_char != 0) break;
+        cursor->x--;
+        if (cursor->x <= 0) break;
+      }
+    }
+  }
+  if (cursor->x > VGA_WIDTH) {
+    cursor->x = 0;
+    cursor->y++;
+  }
   if (cursor->y < 0) cursor->y = 0;
 }
 
