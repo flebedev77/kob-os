@@ -76,19 +76,6 @@ bool is_symbol(char c) { // ASCII decided to sprinkle the symbols about
   if (c < 'A' && c > ' ') return true;
   return false;
 }
-
-char char_to_upper(char c) {
-  if (is_symbol(c)) return symbol_to_upper(c);
-  if (c > 'z' || c < 'a') return c; // already capital
-  return c - (ALPHABET_LEN + SPECIALCHR_LEN);
-}
-
-char char_to_lower(char c) {
-  if (is_symbol(c)) return symbol_to_lower(c);
-  if (c > 'Z' || c < 'A') return c; // already lowercase
-  return c + (ALPHABET_LEN + SPECIALCHR_LEN);
-}
-
 // Fuck you ascii
 char symbol_upper_table[255] = {0};
 char symbol_lower_table[255] = {0};
@@ -105,6 +92,19 @@ char symbol_to_lower(char s) {
   if (!is_symbol(out)) return s;
   return out;
 }
+char char_to_upper(char c) {
+  if (is_symbol(c)) return symbol_to_upper(c);
+  if (c > 'z' || c < 'a') return c; // already capital
+  return c - (ALPHABET_LEN + SPECIALCHR_LEN);
+}
+
+char char_to_lower(char c) {
+  if (is_symbol(c)) return symbol_to_lower(c);
+  if (c > 'Z' || c < 'A') return c; // already lowercase
+  return c + (ALPHABET_LEN + SPECIALCHR_LEN);
+}
+
+
 
 void generate_symbol_lower_table() {
   symbol_upper_table['1'] = '!';
