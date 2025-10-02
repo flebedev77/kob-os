@@ -12,7 +12,7 @@
 
 typedef uint8_t vga_color_t;
 typedef vga_color_t screen_color_t;
-typedef uint16_t tuint_t;
+typedef int tint_t;
 
 enum vga_color {
 	VGA_COLOR_BLACK = 0,
@@ -34,7 +34,7 @@ enum vga_color {
 };
 
 struct term_cursor {
-  tuint_t x, y;
+  tint_t x, y;
 };
 
 
@@ -54,8 +54,8 @@ inline screen_color_t def_screen_color() {
   return (screen_color_t)def_vga_color();
 }
 
-tuint_t term_xy_to_vga_idx(tuint_t x, tuint_t y);
-tuint_t term_cursorpos_to_vga_idx(struct term_cursor* cursor);
+uint16_t term_xy_to_vga_idx(tint_t x, tint_t y);
+uint16_t term_cursorpos_to_vga_idx(struct term_cursor cursor);
 
 void term_scroll(struct term_cursor* cursor);
 

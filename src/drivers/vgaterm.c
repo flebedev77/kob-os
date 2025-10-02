@@ -5,25 +5,30 @@ struct term_cursor cursor = {0};
 
 static uint16_t* vga_mem_ptr = (uint16_t*)VGA_MEMORY;
 
-tuint_t term_xy_to_vga_idx(tuint_t x, tuint_t y) {
-  tuint_t idx = (y * VGA_WIDTH) + x;
+static void term_cursor_boundscheck(struct term_cursor* cursor) {
+  if (cursor->x < 0) cursor->x = 0;
+  if (cursor->x > VGA_WIDTH) cursor->x = 0;
+  if (cursor->y < 0) cursor->y = 0;
+}
+
+uint16_t term_xy_to_vga_idx(tint_t x, tint_t y) {
+  tint_t idx = (y * VGA_WIDTH) + x;
   if (idx > VGA_WIDTH * VGA_HEIGHT) {
     idx = VGA_WIDTH * VGA_HEIGHT;
   }
   return idx;
 }
-tuint_t term_cursorpos_to_vga_idx(struct term_cursor* cursor) {
-  if (cursor == NULL) return 0;
-  return term_xy_to_vga_idx(cursor->x, cursor->y);
+uint16_t term_cursorpos_to_vga_idx(struct term_cursor cursor) {
+  return term_xy_to_vga_idx(cursor.x, cursor.y);
 }
 
 void term_scroll(struct term_cursor* cursor) {
-  for (tuint_t y = 1; y < VGA_HEIGHT; y++) {
-    for (tuint_t x = 0; x < VGA_WIDTH; x++) {
+  for (tint_t y = 1; y < VGA_HEIGHT; y++) {
+    for (tint_t x = 0; x < VGA_WIDTH; x++) {
       vga_mem_ptr[term_xy_to_vga_idx(x, y-1)] = vga_mem_ptr[term_xy_to_vga_idx(x, y)];
     }
   }
-  for (tuint_t x = 0; x < VGA_WIDTH; x++) {
+  for (tint_t x = 0; x < VGA_WIDTH; x++) {
     vga_mem_ptr[term_xy_to_vga_idx(x, VGA_HEIGHT-1)] = 0;
   }
 
@@ -58,30 +63,34 @@ void term_cursor_advanceln(struct term_cursor* cursor) {
 
 
 void term_print(const char* text, vga_color_t color) {
-  for (tuint_t i = 0; text[i] != 0; i++) {
+  term_cursor_boundscheck(&cursor);
+  for (tint_t i = 0; text[i] != 0; i++) {
     if (text[i] == '\n') {
       term_cursor_advanceln(&cursor);
       continue;
     }
-    vga_mem_ptr[term_cursorpos_to_vga_idx(&cursor)] = text[i] | (color << 8);
+    vga_mem_ptr[term_cursorpos_to_vga_idx(cursor)] = text[i] | (color << 8);
     term_cursor_advance(&cursor);    
   }
+  term_cursor_boundscheck(&cursor);
   term_cursor_update_position(&cursor);
 }
 
 void term_putchar(int c, screen_color_t color) {
+  term_cursor_boundscheck(&cursor);
   if (c == '\n') {
     term_cursor_advanceln(&cursor);
     return;
   }
-  vga_mem_ptr[term_cursorpos_to_vga_idx(&cursor)] = c | (color << 8);
+  vga_mem_ptr[term_cursorpos_to_vga_idx(cursor)] = c | (color << 8);
   term_cursor_advance(&cursor);
+  term_cursor_boundscheck(&cursor);
   term_cursor_update_position(&cursor);
 }
 
 void term_clear() {
-  for (tuint_t y = 0; y < VGA_HEIGHT; y++) {
-    for (tuint_t x = 0; x < VGA_WIDTH; x++) {
+  for (tint_t y = 0; y < VGA_HEIGHT; y++) {
+    for (tint_t x = 0; x < VGA_WIDTH; x++) {
       vga_mem_ptr[x + y * VGA_WIDTH] = 0;
     }
   }
@@ -90,7 +99,7 @@ void term_clear() {
 void term_cursor_update_position(struct term_cursor* cursor) {
   if (cursor == NULL) return;
 
-  tuint_t cursor_pos = term_cursorpos_to_vga_idx(cursor);
+  uint16_t cursor_pos = term_cursorpos_to_vga_idx(*cursor);
   outb(0x3D4, 0x0F);
 	outb(0x3D5, (uint8_t) (cursor_pos & 0xFF));
 	outb(0x3D4, 0x0E);
