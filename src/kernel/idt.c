@@ -21,7 +21,7 @@ void interrupt_handler(uint8_t arg) {
     printkf("Fake PIC hardware interrupt occured\n");
   }
   if (intid == SOFTWARE_INTERRUPTS_AMOUNT + 1) { // pckbd interrupt
-    pckbd_interrupt(intid);
+    pckbd_interrupt();
   } else {
     printkf("Interrupt occured with id %d and arg %d\n", intid, arg);
   }
