@@ -1,18 +1,73 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <term.h>
 #include <types.h>
 
 // These probably need to go into string.h
+static char symbol_upper_table[255] = {0};
+static char symbol_lower_table[255] = {0};
+
+void strings_init() {
+  symbol_upper_table['1'] = '!';
+  symbol_upper_table['2'] = '@';
+  symbol_upper_table['3'] = '#';
+  symbol_upper_table['4'] = '$';
+  symbol_upper_table['5'] = '%';
+  symbol_upper_table['6'] = '^';
+  symbol_upper_table['7'] = '&';
+  symbol_upper_table['8'] = '*';
+  symbol_upper_table['9'] = '(';
+  symbol_upper_table['0'] = ')';
+
+  symbol_upper_table['-'] = '_';
+  symbol_upper_table['='] = '+';
+  symbol_upper_table['`'] = '~';
+  symbol_upper_table['['] = '{';
+  symbol_upper_table[']'] = '}';
+  symbol_upper_table['\\'] = '|';
+  symbol_upper_table[','] = '<';
+  symbol_upper_table['.'] = '>';
+  symbol_upper_table['/'] = '?';
+  symbol_upper_table[';'] = ':';
+  symbol_upper_table['\''] = '"';
+
+  for (uint8_t i = 0; i < 255; i++) {
+    symbol_lower_table[(uint8_t)symbol_upper_table[i]] = i;
+  }
+}
+
+bool is_symbol(char c) { // ASCII decided to sprinkle the symbols about
+  if (c > 'Z' && c < 'a') return true;
+  if (c > 'z') return true;
+  if (c < 'A' && c > ' ') return true;
+  return false;
+}
+
+char symbol_to_upper(char s) {
+  if (!is_symbol(s)) return s;
+  char out = symbol_upper_table[(uint8_t)s];
+  if (!is_symbol(out)) return s;
+  return out;
+}
+char symbol_to_lower(char s) {
+  if (!is_symbol(s)) return s;
+  char out = symbol_lower_table[(uint8_t)s];
+  if (!is_symbol(out)) return s;
+  return out;
+}
+
 char char_to_upper(char c) {
-  if (c < 'a') return c; // already capital
+  if (is_symbol(c)) return symbol_to_upper(c);
+  if (c > 'z' || c < 'a') return c; // already capital
   return c - (ALPHABET_LEN + SPECIALCHR_LEN);
 }
 
 char char_to_lower(char c) {
-  if (c > 'Z') return c; // already lowercase
+  if (is_symbol(c)) return symbol_to_lower(c);
+  if (c > 'Z' || c < 'A') return c; // already lowercase
   return c + (ALPHABET_LEN + SPECIALCHR_LEN);
 }
 
@@ -96,6 +151,7 @@ void uint32_to_hex(uint32_t num, char* restrict str) {
   str[idx] = 0;
 }
 
+// TODO: add decimal places specification support. Eg %02X %02f
 int vprintf(const char* restrict format, va_list args) {
   screen_color_t color = def_screen_color();
   for (size_t i = 0; format[i] != '\0'; i++) {
@@ -129,7 +185,7 @@ int vprintf(const char* restrict format, va_list args) {
           case 'b':
             term_print((va_arg(args, int)) ? "true" : "false", color);
           break;
-          // case 'f': break;
+          // case 'f': break; TODO: add floating point numbers support
           default:
             printf("%c not supported\n", suffix);
             break;
@@ -148,4 +204,8 @@ int printf(const char* restrict format, ...) {
   int status = vprintf(format, args);
   va_end(args);
   return status;
+}
+
+void stdio_init() {
+  strings_init();
 }
