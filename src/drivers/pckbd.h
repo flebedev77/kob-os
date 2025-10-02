@@ -62,13 +62,20 @@
 #define KEY_ENTER 0x1C
 #define KEY_SPACE 0x39
 
-// Stateful characters
+#define KEY_EXTENDED_BYTE 0xE0
+
+// Stateful characters / characters which need special treatment
 #define KEY_RELEASE_OFFSET 128 // Add this to key down scancode and you will get the scancode for release
 #define KEY_TAB 0x0F
 #define KEY_CAPSLOCK 0x3A
 #define KEY_LEFTSHIFT 0x2A
 #define KEY_RIGHTSHIFT 0x36
 #define KEY_BACKSPACE 0x0E
+
+#define KEY_LEFTARROW  0x4B
+#define KEY_RIGHTARROW 0x4D
+#define KEY_UPARROW    0x48
+#define KEY_DOWNARROW  0x50
 
 
 struct pckbd_state {
@@ -80,8 +87,13 @@ struct pckbd_state {
        special,     // Same as capslock
        backspace,   // When initially pressed down turns to true, will remain true until any key is released
        tab,         // Same as backspace
-       caps;        // True when left shift, right shift or capslock are true
+       caps,        // True when left shift, right shift or capslock are true
+       left_arrow,  // Same as backspace
+       right_arrow, // Same as backspace
+       up_arrow,    // Same as backspace
+       down_arrow;  // Same as backspace
   char key_pressed; // Last key pressed
+  uint8_t last_scancode; // Last scancode given, used in multiple scancode keys
 };
 
 extern struct pckbd_state kbd_state;

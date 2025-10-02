@@ -116,6 +116,11 @@ static void handle_special_keys(uint8_t scancode) {
   kbd_state.backspace = false;
   kbd_state.tab = false;
 
+  kbd_state.left_arrow = false;
+  kbd_state.right_arrow = false;
+  kbd_state.up_arrow = false;
+  kbd_state.down_arrow = false;
+
   switch (scancode) {
     case KEY_CAPSLOCK:
       kbd_state.capslock = !kbd_state.capslock;
@@ -144,6 +149,23 @@ static void handle_special_keys(uint8_t scancode) {
       break;
   }
 
+  if (kbd_state.last_scancode == KEY_EXTENDED_BYTE) {
+    switch (scancode) {
+      case KEY_LEFTARROW:
+        kbd_state.left_arrow = true;
+        break;
+      case KEY_RIGHTARROW:
+        kbd_state.right_arrow = true;
+        break;
+      case KEY_UPARROW:
+        kbd_state.up_arrow = true;
+        break;
+      case KEY_DOWNARROW:
+        kbd_state.down_arrow = true;
+        break;
+    }
+  }
+
   kbd_state.caps = kbd_state.capslock || kbd_state.left_shift || kbd_state.right_shift;
 }
 
@@ -161,6 +183,12 @@ void pckbd_interrupt(void) {
   if (kbd_state.tab) {
     printkf("  ");
   }
+
+  if (kbd_state.up_arrow) cursor.y--;
+  if (kbd_state.down_arrow) cursor.y++;
+  if (kbd_state.left_arrow) cursor.x--;
+  if (kbd_state.right_arrow) cursor.x++;
+  
 
 #if !DEBUG_RELEASE
   if (scancode < 0x80) { // Only the press down, not release
@@ -188,6 +216,8 @@ void pckbd_interrupt(void) {
 #if !DEBUG_RELEASE
   }
 #endif
+
+  kbd_state.last_scancode = scancode;
 
   term_cursor_update_position(&cursor);
   term_cursor_show(0, 15);
