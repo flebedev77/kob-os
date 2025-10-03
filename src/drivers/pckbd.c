@@ -17,6 +17,20 @@
 
 struct pckbd_state kbd_state = {0};
 
+static on_keypress_t handlers[256];
+static on_keypress_t press_handlers[256];
+static uint8_t current_handler_index = 0;
+static uint8_t current_press_handler_index = 0;
+
+void pckbd_register_onkeypress(on_keypress_t func) {
+  press_handlers[current_press_handler_index] = func;
+  current_press_handler_index++;
+}
+void pckbd_register_onkeyhandle(on_keypress_t func) {
+  handlers[current_handler_index] = func;
+  current_handler_index++;
+}
+
 void pckbd_init(void) {
   kbd_state = (struct pckbd_state){0};
 }
@@ -83,6 +97,8 @@ static char scancode_to_char(uint8_t scancode) {
 
     default: out = 0; break;
   }
+
+  if (out == 0) return 0;
 
   if (kbd_state.caps) out = char_to_upper(out);
 
@@ -174,34 +190,14 @@ void pckbd_interrupt(void) {
 
   handle_special_keys(scancode);
 
-  if (kbd_state.backspace) {
-    cursor.x--;
-    term_putchar(' ', def_screen_color());
-    cursor.x--;
-  }
-
-  if (kbd_state.tab) {
-    printkf("  ");
-  }
-
-  if (kbd_state.up_arrow) cursor.y--;
-  if (kbd_state.down_arrow) cursor.y++;
-  if (kbd_state.left_arrow) cursor.x--;
-  if (kbd_state.right_arrow) cursor.x++;
-  
-
+  char scancode_char = scancode_to_char(scancode);
+  kbd_state.key_pressed = scancode_char;
+#if DEBUG
 #if !DEBUG_RELEASE
   if (scancode < 0x80) { // Only the press down, not release
 #endif
-    char scancode_char = scancode_to_char(scancode);
-    kbd_state.key_pressed = scancode_char;
 
 
-#if !DEBUG
-    if (scancode_char == 0) return;
-#endif
-
-#if DEBUG
     printkf("%X ", scancode);
 
     cursor.y--;
@@ -209,16 +205,20 @@ void pckbd_interrupt(void) {
     printkf("%c ", kbd_state.key_pressed);
     cursor.x += 2;
     cursor.y++;
-#else
-    printkf("%c", kbd_state.key_pressed);
-#endif
     
 #if !DEBUG_RELEASE
   }
 #endif
+#endif
 
   kbd_state.last_scancode = scancode;
 
-  term_cursor_update_position(&cursor);
-  term_cursor_show(0, 15);
+  for (uint8_t i = 0; i < current_handler_index; i++) {
+    handlers[i](&kbd_state);
+  }
+  if (scancode < 0x80) {
+    for (uint8_t i = 0; i < current_press_handler_index; i++) {
+      press_handlers[i](&kbd_state);
+    }
+  }
 }

@@ -97,7 +97,11 @@ struct pckbd_state {
 };
 
 extern struct pckbd_state kbd_state;
+typedef void (*on_keypress_t)(struct pckbd_state* keyboard);
 
 void pckbd_init(void);
 
 void pckbd_interrupt(void);
+
+void pckbd_register_onkeypress(on_keypress_t func);
+void pckbd_register_onkeyhandle(on_keypress_t func);

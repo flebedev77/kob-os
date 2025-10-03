@@ -9,6 +9,7 @@
 #include <pic.h>
 
 #include "drivers/pckbd.h"
+#include "tty/tty.h"
 
 #include <multiboot.h>
 
@@ -64,16 +65,17 @@ void print_mb(struct multiboot_info* mbd) {
 
 void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
   term_clear();
+  stdio_init();
 
-  // print_mb(mbd);
+  print_mb(mbd);
 
   gdt_init();
   pic_init();
   idt_init();
 
   pckbd_init();
+  tty_init();
 
-  stdio_init();
 
   assertk(mb_magic != MULTIBOOT_BOOTLOADER_MAGIC, "Bootloader magic number is incorrect! Should be %x and is %x. The bootloader is messed up!\n", MULTIBOOT_BOOTLOADER_MAGIC, (int)mb_magic);
 
@@ -99,6 +101,12 @@ void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
   // printkf("Hello world %s! Number example %d in hex %x\n", "bob", 123, 123);
   //
   // printkf("Multiboot magic number: %x\n", mb_magic);
+
+  // tty_run never returns, looks for the init process and runs it.
+  // if the init process was not found, then will run a kernel shell
+  // which will let you access basic system information, shutdown,
+  // specify a new place to look for the init executable, etc.
+  tty_run();
 
   while (true) {}
 }

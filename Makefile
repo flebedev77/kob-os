@@ -13,7 +13,7 @@ ISO_TARGET=$(BUILD_DIR)/os.iso
 OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel/util.o $(BUILD_DIR)/kernel.o \
 		 $(BUILD_DIR)/drivers/vgaterm.o $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o \
 		 $(BUILD_DIR)/kernel/gdt.o $(BUILD_DIR)/kernel/idt.o $(BUILD_DIR)/kernel/pic.o \
-		 $(BUILD_DIR)/drivers/pckbd.o
+		 $(BUILD_DIR)/drivers/pckbd.o $(BUILD_DIR)/libc/string.o $(BUILD_DIR)/tty/tty.o
 
 all: $(OBJS) $(TARGET) run
 
@@ -24,6 +24,7 @@ setup:
 	mkdir -p $(BUILD_DIR)/libc
 	mkdir -p $(BUILD_DIR)/libk
 	mkdir -p $(BUILD_DIR)/kernel
+	mkdir -p $(BUILD_DIR)/tty
 
 $(TARGET): $(OBJS)
 	$(CC) -T linker.ld -o $@ $(OBJS) $(LINKFLAGS)
