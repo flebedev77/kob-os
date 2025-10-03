@@ -80,7 +80,7 @@ int int_digits_amt(int val) {
   return i;
 }
 
-void int_to_str(int num, char* str) {
+void int_to_str(int num, char* restrict str) {
     int i = 0;
     int is_negative = 0;
 
