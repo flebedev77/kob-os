@@ -16,6 +16,29 @@ struct idtentry {
 __attribute__((aligned(8)))
 static uint8_t entries[8 * 256] = {0};
 
+char* exception_table[] = {
+  "Divide error",
+  "Debug",
+  "NMI",
+  "Breakpoint",
+  "Overflow",
+  "Bounds check",
+  "Invalid opcode",
+  "Co-processor not avaliable",
+  "Double fault",
+  "Co-processor segment overrun",
+  "Invalid TSS",
+  "Segment not present",
+  "Stack",
+  "General protection",
+  "Page fault"
+};
+
+void exception_handler(uint8_t arg) {
+  panick("%s exception, with arg %d\n", exception_table[intid], arg);
+  __asm__ volatile ("cli; hlt");
+}
+
 void interrupt_handler(uint8_t arg) {
   if (intid == SOFTWARE_INTERRUPTS_AMOUNT + 7 || intid == SOFTWARE_INTERRUPTS_AMOUNT + HARDWARE_INTERRUPTS_AMOUNT) {
     printkf("Fake PIC hardware interrupt occured\n");
@@ -23,14 +46,15 @@ void interrupt_handler(uint8_t arg) {
   if (intid == SOFTWARE_INTERRUPTS_AMOUNT + 1) { // pckbd interrupt
     pckbd_interrupt();
   } else {
-    printkf("Interrupt occured with id %d and arg %d\n", intid, arg);
+    // printkf("Interrupt occured with id %d and arg %d\n", intid, arg);
   }
 
   if (intid >= SOFTWARE_INTERRUPTS_AMOUNT && intid <= SOFTWARE_INTERRUPTS_AMOUNT + HARDWARE_INTERRUPTS_AMOUNT) {
     //is a hardware interrupt
     pic_send_eoi(intid - SOFTWARE_INTERRUPTS_AMOUNT);
+  } else if (intid < SOFTWARE_INTERRUPTS_AMOUNT) {
+    exception_handler(arg);
   }
-  // __asm__ volatile ("cli; hlt");
 }
 
 void encode_idt_entry(uint8_t* restrict target, struct idtentry source) {
