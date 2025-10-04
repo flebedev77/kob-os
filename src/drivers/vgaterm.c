@@ -114,7 +114,9 @@ void term_clear() {
 void term_cursor_update_position(struct term_cursor* cursor) {
   if (cursor == NULL) return;
 
+  cursor->x--;
   uint16_t cursor_pos = term_cursorpos_to_vga_idx(*cursor);
+  cursor->x++;
   outb(0x3D4, 0x0F);
 	outb(0x3D5, (uint8_t) (cursor_pos & 0xFF));
 	outb(0x3D4, 0x0E);
