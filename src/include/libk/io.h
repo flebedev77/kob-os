@@ -1,6 +1,7 @@
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>
+#include <multiboot.h>
 
 void printkf(const char* restrict format, ...);
 void panick(const char* restrict format, ...);
@@ -20,9 +21,10 @@ inline uint8_t inb(uint16_t port) {
   return value;
 }
 
-inline void io_wait(void)
-{
+inline void io_wait(void) {
     outb(0x80, 0);
 }
 
+extern struct multiboot_info* multiboot_ptr;
 
+void print_mb(struct multiboot_info* mbd, bool verbose);
