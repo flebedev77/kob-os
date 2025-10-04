@@ -6,3 +6,16 @@ size_t strlen(const char* restrict str) {
   }
   return i;
 }
+
+int strcmp(const char* restrict a, const char* restrict b) {
+  size_t size_a = strlen(a);
+  size_t size_b = strlen(b);
+
+  if (size_a < size_b) return -1;
+  if (size_a > size_b) return 1;
+
+  for (size_t i = 0; i < size_a; i++) {
+    if (a[i] != b[i]) return (unsigned char)a[i] - (unsigned char)b[i];
+  }
+  return 0;
+}

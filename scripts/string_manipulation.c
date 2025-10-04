@@ -171,6 +171,7 @@ int main() {
     printf("To lower\n");
   }
 
+  printf("Strcmp wrong: %d\n", strcmp("notsame", "novname"));
 
   
   // char buf[100];
