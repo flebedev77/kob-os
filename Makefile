@@ -4,7 +4,7 @@ CC=i686-elf-gcc
 INCLUDES=-Isrc/include -Isrc/include/libc
 CFLAGS=-ffreestanding -std=gnu99 -Wall -Wextra -O2 $(INCLUDES)
 LINKFLAGS=-ffreestanding -O2 -nostdlib -lgcc
-QEMUFLAGS=-no-reboot
+QEMUFLAGS=-no-reboot -cpu host -enable-kvm
 
 BUILD_DIR=build
 
@@ -13,7 +13,8 @@ ISO_TARGET=$(BUILD_DIR)/os.iso
 OBJS=$(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel/util.o $(BUILD_DIR)/kernel.o \
 		 $(BUILD_DIR)/drivers/vgaterm.o $(BUILD_DIR)/libc/stdio.o $(BUILD_DIR)/libk/io.o \
 		 $(BUILD_DIR)/kernel/gdt.o $(BUILD_DIR)/kernel/idt.o $(BUILD_DIR)/kernel/pic.o \
-		 $(BUILD_DIR)/drivers/pckbd.o $(BUILD_DIR)/libc/string.o $(BUILD_DIR)/tty/tty.o
+		 $(BUILD_DIR)/drivers/pckbd.o $(BUILD_DIR)/libc/string.o $(BUILD_DIR)/tty/tty.o \
+		 $(BUILD_DIR)/drivers/power.o $(BUILD_DIR)/drivers/cpu.o
 
 all: $(OBJS) $(TARGET) run
 
@@ -35,6 +36,12 @@ $(BUILD_DIR)/%.o: src/%.s
 	$(AS) $< -o $@
 
 $(ISO_TARGET): $(TARGET)
+	@echo "You should fix this before trying to use on real hardware"
+	@grep "TODO" $$(find . -name '*.[ch]')
+	@echo "MAKE SURE THIS IS FIXED BEFORE USING REAL HARDWARE!"
+	@grep "HARDWAREDAMAGE" $$(find . -name '*.[ch]')
+	@echo "ARE YOU SURE YOU WANT TO RUN ON REAL HARDWARE"
+	@read
 	mkdir -p $(BUILD_DIR)/iso/boot/grub
 	cp $(TARGET) $(BUILD_DIR)/iso/boot/kernel
 	echo "set timeout=0"            > $(BUILD_DIR)/iso/boot/grub/grub.cfg
@@ -46,7 +53,7 @@ $(ISO_TARGET): $(TARGET)
 	rm -r $(BUILD_DIR)/iso
 
 run: $(TARGET)
-	qemu-system-i386 -kernel $(TARGET) $(QEMUFLAGS)
+	qemu-system-x86_64 -kernel $(TARGET) $(QEMUFLAGS)
 
 clean:
 	rm $(OBJS)
