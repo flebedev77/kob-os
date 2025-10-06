@@ -1,4 +1,4 @@
-.arch i386
+.arch i686
 .code32
 
 .section .data
@@ -10,6 +10,9 @@ idtr: .word 0 # uint16_t limit
 
 .global intid
 intid: .byte 0
+
+cpu_vendor: .space 13
+cpu_model: .space 49
 
 .section .text
 
@@ -170,3 +173,36 @@ isr_stub_table:
         .long isr_stub_48
         .long isr_stub_49
         .long isr_stub_50
+
+// UNUSED
+support_cpuid:
+  pushf                               # Save EFLAGS
+  pushf                               # Store EFLAGS
+  xorl $0x00200000, (%esp)           # Invert the ID bit in stored EFLAGS
+  popl %eax                           # eax = modified EFLAGS (ID bit may or may not be inverted)
+  xorl (%esp), %eax                  # eax = whichever bits were changed
+  popf                                # Restore original EFLAGS
+  andl $0x00200000, %eax             # eax = zero if ID bit can't be changed, else non-zero
+  ret
+
+.global get_cpu_vendor
+get_cpu_vendor:
+  movl $0, %eax
+  cpuid
+  movl %ebx, cpu_vendor
+  movl %edx, cpu_vendor + 4
+  movl %ecx, cpu_vendor + 8
+  leal cpu_vendor, %eax
+  ret
+
+.global get_cpu_model
+get_cpu_model:
+  movl $1, %eax
+  cpuid
+  ret
+
+.global get_cpu_support
+get_cpu_support:
+  xor %eax, %eax
+  cpuid
+  ret

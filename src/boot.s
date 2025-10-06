@@ -1,4 +1,4 @@
-.arch i386
+.arch i686
 .code32
 .set ALIGN,    1<<0               /* Tell grub to align our kernel in memory */
 .set MEMINFO,  1<<1               /* Ask grub to provide memory map */

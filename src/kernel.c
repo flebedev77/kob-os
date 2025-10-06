@@ -9,6 +9,9 @@
 #include <pic.h>
 
 #include "drivers/pckbd.h"
+#include "drivers/power.h"
+#include "drivers/cpu.h"
+
 #include "tty/tty.h"
 
 #include <multiboot.h>
@@ -22,11 +25,12 @@
 #endif
 
 void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
-  multiboot_ptr = mbd;
-  term_clear();
-  stdio_init();
+  assertk(mb_magic != MULTIBOOT_BOOTLOADER_MAGIC, "Bootloader magic number is incorrect! Should be %x and is %x. The bootloader is messed up!\n", MULTIBOOT_BOOTLOADER_MAGIC, (int)mb_magic);
 
-  // print_mb(mbd);
+  multiboot_ptr = mbd;
+  cpu_init();
+  stdio_init();
+  power_init();
 
   gdt_init();
   pic_init();
@@ -34,32 +38,6 @@ void k_main(struct multiboot_info* mbd, unsigned int mb_magic) {
 
   pckbd_init();
   tty_init();
-
-
-  assertk(mb_magic != MULTIBOOT_BOOTLOADER_MAGIC, "Bootloader magic number is incorrect! Should be %x and is %x. The bootloader is messed up!\n", MULTIBOOT_BOOTLOADER_MAGIC, (int)mb_magic);
-
-
-  // cursor.x = 3;
-  // cursor.y = 2;
-  // term_cursor_update_position(&cursor);
-  // term_cursor_hide();
-  // term_cursor_show(0, 15);
-
-  // term_print("Hello!\n", def_screen_color());
-  // term_print("Hello world!\nHi from a new line!\n\n", screen_color(VGA_COLOR_RED, VGA_COLOR_BLUE));
-  // vga_color_t col = 0; 
-  // term_print("Hi from a new line and different color!\n", col++);
-  // term_print("Hi from a new line and different color!\n", col++);
-  // term_print("Hi from a new line and different color!\n", col++);
-  //
-  // char* test = "h\n";
-  // test[0] = char_to_lower('B');
-  // term_print(test, def_screen_color());
-  //
-  // cursor.x = 5;
-  // printkf("Hello world %s! Number example %d in hex %x\n", "bob", 123, 123);
-  //
-  // printkf("Multiboot magic number: %x\n", mb_magic);
 
   // tty_run never returns, looks for the init process and runs it.
   // if the init process was not found, then will run a kernel shell
