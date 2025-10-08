@@ -41,12 +41,12 @@ void exception_handler(uint8_t arg) {
 
 void interrupt_handler(uint8_t arg) {
   if (intid == SOFTWARE_INTERRUPTS_AMOUNT + 7 || intid == SOFTWARE_INTERRUPTS_AMOUNT + HARDWARE_INTERRUPTS_AMOUNT) {
-    printkf("Fake PIC hardware interrupt occured\n");
+    return; // Spurious irq, these are sent so that cpu waits until the PIC sends the real interrupt number
   }
   if (intid == SOFTWARE_INTERRUPTS_AMOUNT + 1) { // pckbd interrupt
     pckbd_interrupt();
   } else {
-    // printkf("Interrupt occured with id %d and arg %d\n", intid, arg);
+    // Other hardware interrupt handlers
   }
 
   if (intid >= SOFTWARE_INTERRUPTS_AMOUNT && intid <= SOFTWARE_INTERRUPTS_AMOUNT + HARDWARE_INTERRUPTS_AMOUNT) {
